@@ -13,63 +13,115 @@ const FAQ = [
     }
 ];
 
-// add code here if needed
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+function getFirstChildTextAndRemoveFirstChild(el) {
+    const firstChild = el.firstElementChild;
+    const backgroundColor = firstChild.textContent;
+    el.removeChild(firstChild);
+    return backgroundColor;
+}
+
+function handleLinks(el, parentTag, className) {
+    el.querySelectorAll('a').forEach(link => {
+        const parentEl = link.closest(parentTag);
+        if (parentEl) {
+            link.className = className;
+            parentEl.parentNode.insertBefore(link, parentEl);
+            parentEl.remove();
+        }
+    });
+}
+
+function handleFaqQuestionClick(el) {
+    el.addEventListener('click', (event) => {
+        if (event.target.closest('.question')) {
+            const question = event.target.closest('.question');
+            const answer = question.nextElementSibling;
+            const isOpen = answer.classList.contains('open');
+            document.querySelectorAll('.faq .answer').forEach(ans => {
+                ans.classList.remove('open');
+                ans.style.maxHeight = null;
+                ans.style.padding = '0 8px';
+            });
+            document.querySelectorAll('.faq .question').forEach(q => q.classList.remove('open'));
+            if (!isOpen) {
+                answer.classList.add('open');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.style.padding = '8px';
+                question.classList.add('open');
+            }
+        }
+    });
+}
 
 function processBackgroundColor(el) {
-    // add code here
+    if (!el || !el.firstElementChild) return;
+    el.style.background = getFirstChildTextAndRemoveFirstChild(el);
 }
+
 function processHero(el) {
     processBackgroundColor(el);
-    // add code here
+    el.querySelectorAll('p').forEach(p => {
+        if (p.querySelector('a')) {
+            p.classList.add('action-area');
+        }
+    });
+    handleLinks(el, 'b', 'con-button');
+    handleLinks(el, 'i', 'con-button blue');
 }
+
 function processBrick(el) {
     processBackgroundColor(el);
-    // add code here
+    const paragraphs = el.querySelectorAll('p');
+    paragraphs[0].classList.add('title');
+    paragraphs[1].classList.add('price');
+    paragraphs[2].classList.add('description');
 }
+
 function processFaq(el) {
-    // improve this code
-    el.innerHTML = `
+    el.innerHTML = FAQ.map(item => `
         <div class="faq-set">
             <div class="question">
                 <div>
-                    <h3>${FAQ[0].q}</h3>
+                    <h3>${item.q}</h3>
                 </div>
             </div>
             <div class="answer">
                 <div>
-                    <p>${FAQ[0].a}</p>
+                    <p>${item.a}</p>
                 </div>
             </div>
         </div>
-        <div class="faq-set">
-            <div class="question">
-                <div>
-                    <h3>${FAQ[1].q}</h3>
-                </div>
-            </div>
-            <div class="answer">
-                <div>
-                    <p>${FAQ[1].a}</p>
-                </div>
-            </div>
-        </div>
-        <div class="faq-set">
-            <div class="question">
-                <div>
-                    <h3>${FAQ[2].q}</h3>
-                </div>
-            </div>
-            <div class="answer">
-                <div>
-                    <p>${FAQ[2].a}</p>
-                </div>
-            </div>
-        </div>`;
-    // add code here
+    `).join('');
+
+    handleFaqQuestionClick(el)
 }
+
 function processBanner(el) {
-    // add code here
+    handleLinks(el, 'b', 'con-button blue');
+    const hero = document.querySelector('.hero');
+    const banner = el;
+    function checkHeroVisibility() {
+        const heroRect = hero.getBoundingClientRect();
+        const isHeroOffScreen = heroRect.bottom < 0;
+        if (isHeroOffScreen) {
+            banner.style.transform = 'translateY(0)';
+        } else {
+            banner.style.transform = 'translateY(100%)';
+        }
+    }
+    checkHeroVisibility();
+    window.addEventListener('scroll', debounce(checkHeroVisibility, 100));
+    banner.style.transition = 'transform 0.3s ease';
 }
+
 document.querySelectorAll('.hero').forEach(processHero);
 document.querySelectorAll('.brick').forEach(processBrick);
 document.querySelectorAll('.faq').forEach(processFaq);
