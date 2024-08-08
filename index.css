@@ -156,6 +156,12 @@ body {
 .brick {
     padding: 20px;
 }
+.brick.double {
+    grid-column: span 2;
+}
+.brick.triple {
+    grid-column: span 3;
+}
 .title {
     text-align: center;
     font-size: 20px;
@@ -173,6 +179,8 @@ body {
 }
 
 .masonry {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     margin: 0 auto;
     padding: 50px;
     gap: var(--spacing-m);
@@ -191,9 +199,19 @@ body {
     justify-content: space-between;
     align-items: center;
     position: relative;
+    cursor: pointer;
 }
 .faq .answer {
+    display: none;
     padding: 0 8px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.faq .answer.open {
+    display: block;
+    max-height: 200px;
+    padding: 8px;
 }
 .faq .question::after {
     content: '';
@@ -207,14 +225,21 @@ body {
     transform: rotate(225deg);
     right: 12px;
     top: 36px;
+    transition: transform 0.3s ease;
 }
 .faq .answer p {
     margin-top: 0;
+}
+.faq .question.open::after {
+    transform: rotate(135deg);
 }
 .banner {
     background-color: #eee;
     padding: 16px;
     text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
 .banner .con-button.blue {
     margin-left: 8px;
@@ -230,5 +255,16 @@ body {
     .action-area {
         align-items: center;
         flex-direction: row;
+    }
+}
+
+@media screen and (max-width: 599px) {
+    .masonry {
+        grid-template-columns: 1fr;
+    }
+    .brick,
+    .brick.double,
+    .brick.triple {
+        grid-column: span 1;
     }
 }
